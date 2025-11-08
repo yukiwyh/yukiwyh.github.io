@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光影魔法实验室</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #2a3a7c);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(90deg, #ff8a00, #e52e71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+        
+        .lab-container {
+            position: relative;
+            width: 95%;
+            max-width: 800px;
+            height: 400px;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(40, 60, 130, 0.7) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(30, 50, 120, 0.7) 0%, transparent 50%),
+                #0f1a5a;
+            border: 2px solid #3949ab;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin: 0 auto 20px;
+            overflow: hidden;
+        }
+        
+        .light-source {
+            position: absolute;
+            width: 80px;
+            height: 40px;
+            cursor: move;
+            z-index: 10;
+            left: 80px;
+            top: 180px;
+        }
+        
+        .flashlight-body {
+            width: 30px;
+            height: 40px;
+            background: linear-gradient(to right, #5a5a5a, #2c2c2c, #5a5a5a);
+            border-radius: 5px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+        }
+        
+        .flashlight-head {
+            width: 50px;
+            height: 40px;
+            background: linear-gradient(to right, #8a8a8a, #a0a0a0, #8a8a8a);
+            border-radius: 10px 20px 20px 10px;
+            position: absolute;
+            left: 25px;
+            top: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+        }
+        
+        .flashlight-lens {
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(200,230,255,0.7) 30%, rgba(100,180,255,0.3) 70%, transparent 100%);
+            border-radius: 50%;
+        }
+        
+        .light-beam {
+            position: absolute;
+            width: 400px;
+            height: 200px;
+            background: conic-gradient(from 90deg at 0% 50%, 
+                rgba(255,255,150,0.8) 0deg, 
+                rgba(255,255,100,0.6) 30deg, 
+                rgba(255,200,50,0.4) 60deg, 
+                transparent 90deg);
+            clip-path: polygon(0% 50%, 100% 0%, 100% 100%);
+            left: 75px;
+            top: -80px;
+            z-index: 5;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        .object {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle at 30% 30%, #e91e63, #c2185b);
+            border-radius: 50%;
+            cursor: move;
+            z-index: 20;
+            left: 300px;
+            top: 165px;
+            box-shadow: 
+                inset -5px -5px 10px rgba(0, 0, 0, 0.3),
+                0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .object-highlight {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+            border-radius: 50%;
+            top: 15px;
+            left: 15px;
+        }
+        
+        .screen {
+            position: absolute;
+            width: 20px;
+            height: 250px;
+            background: linear-gradient(to right, #cfd8dc, #eceff1, #cfd8dc);
+            right: 80px;
+            top: 75px;
+            z-index: 5;
+            cursor: move;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        
+        .shadow {
+            position: absolute;
+            background: radial-gradient(ellipse, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 70%, transparent 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 15;
+            opacity: 0.8;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            width: 95%;
+            max-width: 800px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(to bottom, #3949ab, #283593);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(to bottom, #4252c8, #3244b5);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .warning {
+            color: #ff5252;
+            font-weight: bold;
+            margin: 10px 0;
+            text-align: center;
+            min-height: 24px;
+            font-size: 1.1rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            width: 95%;
+            max-width: 800px;
+            text-align: center;
+        }
+        
+        .ai-hint {
+            background: linear-gradient(135deg, #ff8a00, #e52e71);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            width: 95%;
+            max-width: 800px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .element-label {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            z-index: 25;
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .lab-container {
+                height: 350px;
+            }
+            
+            button {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔮 光影魔法实验室</h1>
+        <p class="subtitle">拖动光源、球体或投影屏，观察影子的神奇变化！</p>
+    </div>
+    
+    <div class="lab-container" id="lab">
+        <div class="light-source" id="light">
+            <div class="flashlight-body"></div>
+            <div class="flashlight-head">
+                <div class="flashlight-lens"></div>
+            </div>
+            <div class="light-beam" id="lightBeam"></div>
+            <div class="element-label" style="bottom: -25px; left: 10px;">光源</div>
+        </div>
+        
+        <div class="object" id="object">
+            <div class="object-highlight"></div>
+            <div class="element-label" style="bottom: -25px; left: 15px;">球体</div>
+        </div>
+        
+        <div class="screen" id="screen">
+            <div class="element-label" style="top: -30px; left: -10px;">投影屏</div>
+        </div>
+        
+        <!-- 影子将由JavaScript动态创建 -->
+    </div>
+    
+    <div class="warning" id="warning"></div>
+    
+    <div class="controls">
+        <button onclick="resetLab()">
+            <span>🔄</span> 重置实验
+        </button>
+        <button onclick="toggleElement('light')">
+            <span>💡</span> 显示/隐藏光源
+        </button>
+        <button onclick="toggleElement('object')">
+            <span>🔴</span> 显示/隐藏球体
+        </button>
+        <button onclick="toggleElement('screen')">
+            <span>📺</span> 显示/隐藏投影屏
+        </button>
+    </div>
+    
+    <div class="instructions">
+        <p>💡 <strong>操作指南：</strong> 拖动光源、球体或投影屏来改变它们的位置，观察影子的变化！</p>
+    </div>
+    
+    <div class="ai-hint">
+        <p>🧙‍♂️ <strong>AI魔法提示：</strong> 缺少光源、球体或投影屏中的任何一个，影子召唤都会失败哦！</p>
+    </div>
+
+    <script>
+        // 获取元素
+        const lab = document.getElementById('lab');
+        const light = document.getElementById('light');
+        const object = document.getElementById('object');
+        const screen = document.getElementById('screen');
+        const warning = document.getElementById('warning');
+        const lightBeam = document.getElementById('lightBeam');
+        
+        let shadow = null;
+        let draggedElement = null;
+        let offsetX, offsetY;
+        
+        // 初始化影子
+        function initShadow() {
+            shadow = document.createElement('div');
+            shadow.className = 'shadow';
+            lab.appendChild(shadow);
+            updateShadow();
+        }
+        
+        // 更新影子位置和大小
+        function updateShadow() {
+            // 检查元素是否存在且可见
+            const lightVisible = light.style.display !== 'none';
+            const objectVisible = object.style.display !== 'none';
+            const screenVisible = screen.style.display !== 'none';
+            
+            if (!lightVisible || !objectVisible || !screenVisible) {
+                warning.textContent = '魔法失败！缺少实验元素！';
+                if (shadow) shadow.style.display = 'none';
+                lightBeam.style.display = 'none';
+                return;
+            }
+            
+            warning.textContent = '';
+            if (shadow) shadow.style.display = 'block';
+            lightBeam.style.display = 'block';
+            
+            // 计算影子的位置和大小（基于光学原理）
+            const lightRect = light.getBoundingClientRect();
+            const objectRect = object.getBoundingClientRect();
+            const screenRect = screen.getBoundingClientRect();
+            const labRect = lab.getBoundingClientRect();
+            
+            const lightX = lightRect.left + lightRect.width / 2 - labRect.left;
+            const objectX = objectRect.left + objectRect.width / 2 - labRect.left;
+            const screenX = screenRect.left - labRect.left;
+            
+            const lightY = lightRect.top + lightRect.height / 2 - labRect.top;
+            const objectY = objectRect.top + objectRect.height / 2 - labRect.top;
+            const screenY = screenRect.top + screenRect.height / 2 - labRect.top;
+            
+            // 计算光线方向向量
+            const dirX = objectX - lightX;
+            const dirY = objectY - lightY;
+            
+            // 计算光线与屏幕的交点
+            const t = (screenX - objectX) / dirX;
+            const intersectY = objectY + dirY * t;
+            
+            // 计算影子大小（距离越远，影子越大）
+            const distanceToScreen = screenX - objectX;
+            const distanceLightToObject = objectX - lightX;
+            
+            if (distanceLightToObject <= 0 || t < 0) {
+                if (shadow) shadow.style.display = 'none';
+                return;
+            }
+            
+            const scale = 1 + Math.abs(distanceToScreen / distanceLightToObject);
+            const shadowSize = objectRect.width * scale;
+            
+            // 计算影子位置（在屏幕上）
+            const shadowLeft = screenX;
+            const shadowTop = intersectY - shadowSize / 2;
+            
+            // 应用影子样式
+            if (shadow) {
+                shadow.style.width = shadowSize + 'px';
+                shadow.style.height = shadowSize + 'px';
+                shadow.style.left = shadowLeft + 'px';
+                shadow.style.top = shadowTop + 'px';
+                shadow.style.borderRadius = '50%';
+            }
+            
+            // 更新光线束的方向和大小
+            updateLightBeam(lightX, lightY, objectX, objectY);
+        }
+        
+        // 更新光线束
+        function updateLightBeam(lightX, lightY, objectX, objectY) {
+            // 计算光线束的角度
+            const deltaX = objectX - lightX;
+            const deltaY = objectY - lightY;
+            const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+            
+            // 计算光线束的长度
+            const beamLength = Math.sqrt(deltaX * deltaX + deltaY * deltaY) * 1.5;
+            
+            // 更新光线束样式
+            lightBeam.style.width = beamLength + 'px';
+            lightBeam.style.transform = `rotate(${angle}deg)`;
+            lightBeam.style.transformOrigin = '0% 50%';
+        }
+        
+        // 重置实验室
+        function resetLab() {
+            light.style.left = '80px';
+            light.style.top = '180px';
+            light.style.display = 'block';
+            
+            object.style.left = '300px';
+            object.style.top = '165px';
+            object.style.display = 'block';
+            
+            screen.style.right = '80px';
+            screen.style.top = '75px';
+            screen.style.display = 'block';
+            
+            updateShadow();
+        }
+        
+        // 显示/隐藏元素
+        function toggleElement(elementId) {
+            const element = document.getElementById(elementId);
+            if (element.style.display === 'none') {
+                element.style.display = 'block';
+            } else {
+                element.style.display = 'none';
+            }
+            updateShadow();
+        }
+        
+        // 拖拽功能
+        function setupDrag(element) {
+            element.addEventListener('mousedown', startDrag);
+            element.addEventListener('touchstart', startDragTouch);
+        }
+        
+        function startDrag(e) {
+            e.preventDefault();
+            draggedElement = this;
+            
+            const rect = draggedElement.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+        
+        function startDragTouch(e) {
+            e.preventDefault();
+            draggedElement = this;
+            
+            const touch = e.touches[0];
+            const rect = draggedElement.getBoundingClientRect();
+            offsetX = touch.clientX - rect.left;
+            offsetY = touch.clientY - rect.top;
+            
+            document.addEventListener('touchmove', onDragTouch);
+            document.addEventListener('touchend', stopDrag);
+        }
+        
+        function onDrag(e) {
+            if (!draggedElement) return;
+            
+            const labRect = lab.getBoundingClientRect();
+            const x = e.clientX - labRect.left - offsetX;
+            const y = e.clientY - labRect.top - offsetY;
+            
+            // 限制在实验室内
+            const maxX = labRect.width - draggedElement.offsetWidth;
+            const maxY = labRect.height - draggedElement.offsetHeight;
+            
+            if (draggedElement === screen) {
+                // 对于投影屏，我们使用right和top定位
+                const right = labRect.width - (x + draggedElement.offsetWidth);
+                draggedElement.style.right = Math.max(10, Math.min(right, labRect.width - 10)) + 'px';
+                draggedElement.style.top = Math.max(10, Math.min(y, maxY)) + 'px';
+            } else {
+                draggedElement.style.left = Math.max(10, Math.min(x, maxX)) + 'px';
+                draggedElement.style.top = Math.max(10, Math.min(y, maxY)) + 'px';
+            }
+            
+            updateShadow();
+        }
+        
+        function onDragTouch(e) {
+            if (!draggedElement) return;
+            
+            const touch = e.touches[0];
+            const labRect = lab.getBoundingClientRect();
+            const x = touch.clientX - labRect.left - offsetX;
+            const y = touch.clientY - labRect.top - offsetY;
+            
+            // 限制在实验室内
+            const maxX = labRect.width - draggedElement.offsetWidth;
+            const maxY = labRect.height - draggedElement.offsetHeight;
+            
+            if (draggedElement === screen) {
+                // 对于投影屏，我们使用right和top定位
+                const right = labRect.width - (x + draggedElement.offsetWidth);
+                draggedElement.style.right = Math.max(10, Math.min(right, labRect.width - 10)) + 'px';
+                draggedElement.style.top = Math.max(10, Math.min(y, maxY)) + 'px';
+            } else {
+                draggedElement.style.left = Math.max(10, Math.min(x, maxX)) + 'px';
+                draggedElement.style.top = Math.max(10, Math.min(y, maxY)) + 'px';
+            }
+            
+            updateShadow();
+        }
+        
+        function stopDrag() {
+            draggedElement = null;
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('touchmove', onDragTouch);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+        
+        // 初始化
+        window.addEventListener('load', function() {
+            initShadow();
+            setupDrag(light);
+            setupDrag(object);
+            setupDrag(screen);
+            
+            // 响应窗口大小变化
+            window.addEventListener('resize', updateShadow);
+        });
+    </script>
+</body>
+</html>
